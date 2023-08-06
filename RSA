@@ -1,65 +1,32 @@
-#include<stdio.h>
-#include<math.h>
- 
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
 
-int gcd(int a, int h)
-{
-    int temp;
-    while(1)
+def generate_key_pair():
+    key = RSA.generate(2048)  # 2048-bit key size (adjust as needed)
+    private_key = key.export_key()
+    public_key = key.publickey().export_key()
+    return private_key, public_key
 
-    {
-        temp = a%h;
-        if(temp==0)
-        return h;
-        a = h;
-        h = temp;
-    }
-}
- 
-int main()
-{
+def encrypt_data(public_key, data):
+    rsa_key = RSA.import_key(public_key)
+    cipher = PKCS1_OAEP.new(rsa_key)
+    encrypted_data = cipher.encrypt(data.encode('utf-8'))
+    return encrypted_data
+
+def decrypt_data(private_key, encrypted_data):
+    rsa_key = RSA.import_key(private_key)
+    cipher = PKCS1_OAEP.new(rsa_key)
+    decrypted_data = cipher.decrypt(encrypted_data)
+    return decrypted_data.decode('utf-8')
+
+if __name__ == "__main__":
     
-    double p = 3;
-    double q = 7;
-    double n=p*q;
-    double count;
-    double totient = (p-1)*(q-1);
- 
-    
-    double e=2;
- 
-    
-    while(e<totient){
-    count = gcd(e,totient);
-    if(count==1)
-        break;
-    else
-        e++;
-    }
- 
-    
-    double d;
- 
-    
-    double k = 2;
- 
-   
-    d = (1 + (k*totient))/e;
-    double msg = 12;
-    double c = pow(msg,e);
-    double m = pow(c,d);
-    c=fmod(c,n);
-    m=fmod(m,n);
- 
-    printf("Message data = %lf",msg);
-    printf("\np = %lf",p);
-    printf("\nq = %lf",q);
-    printf("\nn = pq = %lf",n);
-    printf("\ntotient = %lf",totient);
-    printf("\ne = %lf",e);
-    printf("\nd = %lf",d);
-    printf("\nEncrypted data = %lf",c);
-    printf("\nOriginal Message Sent = %lf",m);
- 
-    return 0;
-}
+    private_key, public_key = generate_key_pair()
+
+    plaintext = "This is a secret message."
+
+    encrypted_data = encrypt_data(public_key, plaintext)
+    print(f"Encrypted data: {encrypted_data.hex()}")
+
+    decrypted_data = decrypt_data(private_key, encrypted_data)
+    print(f"Decrypted data: {decrypted_data}")
